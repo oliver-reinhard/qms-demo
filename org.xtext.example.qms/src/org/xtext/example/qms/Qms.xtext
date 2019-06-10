@@ -1,0 +1,63 @@
+grammar org.xtext.example.qms.Qms with org.eclipse.xtext.common.Terminals
+
+generate qms "http://www.xtext.org/example/qms/Qms"
+
+Model:
+	Repository | RepositoryNode;
+	
+Repository:
+	'repository'
+	name=ID
+	'type' type=RepositoryType
+	root=RepositoryNode;
+
+enum RepositoryType:
+	REQUIREMENT='requirement' | EVIDENCE = 'evidence' | QMS='qms' | BOM='bom';	
+	
+RepositoryNode:
+	RequirementNode | EvidenceNode | BomNode; // | QmsNode
+	
+RequirementNode: 
+	'req'
+	name=ID
+	('was' formerName=ID)? // name in the previous version of the regulation
+	'{'
+	('title' title=STRING)?
+	(body+=NodeBodyElement)*
+	(children+=RequirementNode)*
+	'}';
+	
+BomNode: 
+	'bom'
+	name=ID
+	'{'
+	('title' title=STRING)?
+	(body+=NodeBodyElement)*
+	'weight' weight=INT
+	(children+=BomNode)*
+	'}';
+
+EvidenceNode:
+	'evi'
+	name=ID
+	'{'
+	('title' title=STRING)?
+	(body+=NodeBodyElement)*
+	(children+=EvidenceNode)*
+	'}';
+
+//QmsNode 
+//;
+
+NodeBodyElement:
+	Text | NodeReference;
+
+Text:
+	'text' text=STRING;
+	
+NodeReference:
+		'ref' ref=[RepositoryNode|QualifiedName];
+
+	
+QualifiedName:
+	ID ('.' ID)*;
